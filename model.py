@@ -1,119 +1,110 @@
 import numpy as np
-import tensorflow as tf
-import keras
-from keras.models import Sequential, Model
+from keras.models import Sequential
 from keras.preprocessing.text import one_hot
 from keras.preprocessing.sequence import pad_sequences
-from keras.layers import LSTM, Dense, Dropout, Input, Concatenate, Reshape
-from keras.layers.convolutional import Conv1D, MaxPooling1D, Conv2D, MaxPooling2D
+from keras.layers import Concatenate,Reshape , Input ,LSTM, Dense, Dropout ,concatenate , Flatten ,GlobalMaxPooling1D
+from keras.layers.convolutional import Conv2D, MaxPooling2D , Conv1D
 from keras.layers.embeddings import Embedding
-from prepare_data import QuestionsData
-from train import Train
+from keras.layers.core import Activation,Lambda
+import tensorflow as tf
+from keras import backend as K
+from keras.engine.topology import Layer
+
+        
+def question_hierarchy(Ques,max_length,vocab_size):
+
+ word_level = Embedding ( vocab_size , 512 , input_length=max_length)(Ques)
  
-vocab_size = 1000
-max_length = 15
-batchsize = 300
-d = 512
-N = 14
-k = 1
+ uni_gram = Conv1D( 512 , kernel_size = 1 , activation='tanh' , padding='same' )(word_level)
+ bi_gram  = Conv1D( 512 , kernel_size = 2 , activation='tanh' , padding='same' )(word_level)
+ tri_gram = Conv1D( 512 , kernel_size = 3 , activation='tanh' , padding='same' )(word_level)
+
+ phrases = []
  
+ for w in range(0,max_length):
+    
+   Uni =uni_gram [:,w,:]
+   Uni= tf.reshape(Uni , [-1,1,512 ])
+  
+   Bi = bi_gram [:,w,:]
+   Bi = tf.reshape(Bi , [-1,1,512 ])
+
+   Tri= tri_gram [:,w,:]
+   Tri = tf.reshape( Tri , [-1,1,512 ])
+
+   Uni_Bi_Tri  =  Concatenate(axis=1)([ Uni, Bi , Tri ])
+   Best_phrase = GlobalMaxPooling1D()(Uni_Bi_Tri)
+   Best_phrase = tf.reshape( Best_phrase , [-1,1,512 ])
+   phrases.append(Best_phrase)
+  
+
+ phrase_level = Concatenate(axis=1)(phrases)
  
-Q = tf.placeholder(tf.float32, [batchsize, 15])
-V = tf.placeholder(tf.float32, [batchsize, d, N * N])
+ Question_level =  LSTM( 512  ,input_shape=(15,512) ,return_sequences='true')(phrase_level)
  
+ return word_level, phrase_level, Question_level
+
+def parallel_co_attention ( Q , V ):
+      
+ initializer = tf.contrib.layers.xavier_initializer()
+ Wb = tf.Variable(initializer([512,512])) #shape(512,512)
+ Q_Wb = K.dot(Q, Wb)  #(?,15,512)*(512,512) = (?,15,512)
+ C = tf.nn.tanh(K.batch_dot(Q_Wb,V))  #(?,15,512)*(?,512,196) = (?,15,196)
+ print("C = " , C.shape)
+ """Computing WvV """
  
-def question_hierarchy(Q):
-    # Word Level
-    word_level = Embedding(vocab_size, 512, input_length=max_length)(Q)
-    word = Reshape((15, 512, 1), input_shape=(15, 512))(word_level) # (300, 15, 512, 1)
+ Wvt = tf.Variable(initializer([512,150]))
+ Vt = tf.transpose(V, perm=[0, 2, 1])  # V transposed
+ Vt_Wvt = K.dot( Vt , Wvt ) #shape 
+ Wv_V = tf.transpose(Vt_Wvt, perm=[0, 2, 1]) 
+
+ print("WvV = ",Wv_V.shape)
+
+ """WqQ_C """
+
+ Wqt = tf.Variable(initializer([512,150]))
+ Qt_Wvt = K.dot( Q , Wqt ) 
+ Wq_Q = tf.transpose(Qt_Wvt , perm=[0, 2, 1])
+ print("Wq_Q = ",Wq_Q.shape)
+ Wq_Q_C = K.batch_dot(Wq_Q ,C)
+ print("Wq_Q_C = ",Wv_V.shape)
+
+ """Hv """
+ Hv = tf.add(Wv_V,Wq_Q_C)
+ Hv = tf.nn.tanh(Hv)
+ print("Hv = ",Hv.shape)
+
+ """av """
+
+ Whv = tf.Variable(initializer([150,1]))
+ Hvt = tf.transpose(Hv , perm=[0, 2, 1])
+
+ av = tf.transpose(K.dot(Hvt , Whv), perm=[0, 2, 1])
+ av = tf.nn.softmax(av)
+ print("av = ",av.shape)
+
+ v = K.batch_dot(av,Vt)
+ print("v^ = ",v.shape)
+
+ """attenstion of Question """
+
+
+
+ """computng Hq """
+ Ct = tf.transpose(C, perm=[0, 2, 1]) #transpose of C
+ Hq = Wq_Q + K.batch_dot(Wv_V,Ct) 
+ print("Hq = ",Hq.shape)
+
  
-    # Phrase Level
-    uni_gram = Conv2D(1, (1, 512), activation='tanh', input_shape=(15, 512, 1), padding='same')(word)
-    bi_gram = Conv2D(1, (2, 512), activation='tanh', input_shape=(15, 512, 1), padding='same')(word)
-    tri_gram = Conv2D(1, (3, 512), activation='tanh', input_shape=(15, 512, 1), padding='same')(word)
-    phrase = keras.layers.concatenate([uni_gram, bi_gram, tri_gram]) # (300, 15, 512, 3)
-    phrase_level = MaxPooling2D(pool_size=(1, 3), data_format='channels_first')(phrase) # (300, 15, 512, 1)
-    phrase_level = Reshape((15, 512), input_shape=(15, 512, 1))(phrase_level)
- 
-    # Question Level
-    question_level = LSTM(512, input_shape=(15, 512))(phrase_level) # (300, 512)
-    question_level = tf.reshape(question_level, [batchsize, 1, 512])
- 
-    return word_level, phrase_level, question_level
- 
- 
-def parallel_co_attention(Qw, V):
-    # Step 1
-    Wb = tf.Variable(tf.random_uniform((batchsize,d, d), 0, 1))
-    C = tf.matmul(Qw, Wb)
-    C = tf.matmul(C, V)
-    C = tf.nn.tanh(C)  # shape(batchs, T, N) = (300, 15, 196)
- 
-    # Step2
-    Wv = tf.Variable(tf.random_uniform((batchsize, k, d), 0, 1))
-    Wq = tf.Variable(tf.random_uniform((batchsize, k, d), 0, 1))
- 
-    QwT = tf.transpose(Qw, perm=[0, 2, 1])
-    Hv = tf.add(tf.matmul(Wv, V), tf.matmul(tf.matmul(Wq, QwT), C))
-    Hv = tf.nn.tanh(Hv)  # shape(K, N)
- 
-    CT = tf.transpose(C, perm=[0, 2, 1])
-    Hq = tf.add(tf.matmul(Wq, QwT), tf.matmul(tf.matmul(Wv, V), CT))
-    Hq = tf.nn.tanh(Hq)  # shape(K, T)
- 
-    #Step 3
-    Whv = tf.Variable(tf.random_uniform((batchsize, 1, k), 0, 1))
-    Whq = tf.Variable(tf.random_uniform((batchsize, 1, k), 0, 1))
- 
-    av = tf.matmul(Whv, Hv)
-    av = tf.nn.softmax(av)  # shape(K, N)
-    aq = tf.matmul(Whq, Hq)
-    aq = tf.nn.softmax(aq)  # shape(K, T)
- 
-    #Step 4
-    v = tf.zeros([batchsize, k, d])
-    Vt = tf.transpose(V, perm=[0, 2, 1])
-    for i in range(N):
-        v = tf.add(tf.matmul(av[:batchsize, :k, i:i+1], Vt[:batchsize, i:i+1, :d]), v)
- 
-    q = tf.zeros([batchsize, k, d])
-    seq_len = Qw.shape[1]
-    for i in range(seq_len):
-        q = tf.add(tf.matmul(aq[:batchsize, :k, i:i+1], Qw[:300, i:i+1, :d]), q)
-    print("av: ", av.shape)
-    print("aq: ", aq.shape)
-    return v, q
- 
- 
-def predict_answer(qw, qp, qs, vw, vp, vs):
-    Ww = tf.Variable(tf.random_normal([batchsize, 1, 1]))
-    hw = tf.matmul(Ww, tf.add(qw, vw))
-    hw = tf.nn.tanh(hw)
-    print(hw.shape)
- 
-    Wp = tf.Variable(tf.random_normal([batchsize, 1, 1]))
-    hp = tf.matmul(Wp, tf.concat([tf.add(qp, vp), hw], axis=2))
-    hp = tf.nn.tanh(hp)
-    print(hp.shape)
- 
-    Ws = tf.Variable(tf.random_normal([batchsize, 1, 1]))
-    hs = tf.matmul(Ws, tf.concat([tf.add(qs, vs), hp], axis=2))
-    hs = tf.nn.tanh(hs)
-    print(hs.shape)
- 
-    Wh = tf.Variable(tf.random_normal([batchsize, 1, 1]))
-    p = tf.matmul(Wh, hs)
-    print(p.shape)
- 
- 
- 
-word_level, phrase_level, question_level = question_hierarchy(Q)
-vw, qw = parallel_co_attention(word_level, V)
-vp, qp = parallel_co_attention(phrase_level, V)
-vs, qs = parallel_co_attention(question_level, V)
-# x = tf.concat([v, q], axis=2)
-print("vw: ", vw.shape, "qw: ", qw.shape)
-print("vp: ", vp.shape, "qp: ", qp.shape)
-print("vs: ", vs.shape, "qs: ", qs.shape)
-# print("x: ", x.shape)
-predict_answer(qw, qp, qp, vw, vp, vp)
+ """computng aq """
+ Whq = tf.Variable(initializer([150,1])) #shape(k,1)
+ Hqt = tf.transpose(Hq , perm=[0, 2, 1])
+
+ aq = tf.transpose(K.dot(Hqt , Whq), perm=[0, 2, 1])
+ aq = tf.nn.softmax(aq)
+ print("aq = ",aq.shape)
+
+ q = K.batch_dot(aq,Q)
+ print("q^ = ",q.shape)
+ return v,q
+
