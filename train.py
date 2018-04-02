@@ -1,33 +1,30 @@
 import numpy as np
-import keras
 import operator
 import random
-from keras.models import Sequential
 from keras.preprocessing.text import one_hot
 from keras.preprocessing.sequence import pad_sequences
-from keras.layers import LSTM, Dense, Dropout
-from keras.layers.convolutional import Conv1D, MaxPooling1D
-from keras.layers.embeddings import Embedding
 from keras.utils import np_utils
 from sklearn.preprocessing import LabelEncoder
 from prepare_data import QuestionsData
-
+from nltk.stem import WordNetLemmatizer
 
 class Train(object):
     def __init__(self):
-           #Train dataset
-           self._questions_reader = QuestionsData("data/vqa/Questions/v2_OpenEnded_mscoco_train2014_questions.json", "data/vqa/Annotations/v2_mscoco_train2014_annotations.json")
-	        self._answers = self._questions_reader.get_answers()
-	        self._questions_info, self._questions = self._questions_reader.read_questions_data()
-	        #Validation dataset
-	        self._questions_reader_val = QuestionsData("data/vqa/Questions/v2_OpenEnded_mscoco_val2014_questions.json", "data/vqa/Annotations/v2_mscoco_val2014_annotations.json")
-	        self._questions_info_val, self._questions_val = self._questions_reader_val.read_questions_data()
-           self._vocab_size, self._max_length = 1000, 15
-	        self.targets_size = 0
-
+        # Train dataset
+        self._questions_reader = QuestionsData("C:/Users/abdal_000/.spyder-py3/data/vqa/Questions/v2_OpenEnded_mscoco_train2014_questions.json",
+                                               "C:/Users/abdal_000/.spyder-py3/data/vqa/Annotations/v2_mscoco_train2014_annotations.json")
+        self._answers = self._questions_reader.get_answers()
+        self._questions_info, self._questions = self._questions_reader.read_questions_data()
+        # Validation dataset
+        self._questions_reader_val = QuestionsData("C:/Users/abdal_000/.spyder-py3/data/vqa/Questions/v2_OpenEnded_mscoco_val2014_questions.json",
+                                                   "C:/Users/abdal_000/.spyder-py3/data/vqa/Annotations/v2_mscoco_val2014_annotations.json")
+        self._questions_info_val, self._questions_val = self._questions_reader_val.read_questions_data()
+        self._vocab_size, self._max_length = 1000, 15
+        print("a")
+        self.targets_size = 0
 
     def get_top_answers(self):
-        answers_freq, answers_prob = {}, {}
+        answers_freq = {}
         top_answers = []
 
         # Calculate the frequency of each answer
@@ -39,9 +36,8 @@ class Train(object):
                     answers_freq[ans] = answers_freq[ans] + 1
 
         # Calculate the probability of each answer
-        for ans in answers_freq:
-            answers_prob[ans] = answers_freq[ans] / float(len(answers_freq))
-        top_answers = sorted(answers_prob.items(), key=operator.itemgetter(1))
+
+        top_answers = sorted(answers_freq.items(), key=operator.itemgetter(1))
         top_answers.reverse()
         dic, cnt = {}, 1
         for item in top_answers[:1000]:
@@ -83,9 +79,6 @@ class Train(object):
         y_train, y_val = np_utils.to_categorical(encoded_y_train), np_utils.to_categorical(encoded_y_val)
         return x_train, y_train, x_val, y_val
 
-
-
-
 # x_train, y_train, x_val, y_val = Train().load_data()
 # # print(y_train)
 # # print(y_val)
@@ -99,7 +92,4 @@ class Train(object):
 # # print(top_ans)
 # # print(dic)
 # print(y_train )
-
-
-
-
+Train=Train()

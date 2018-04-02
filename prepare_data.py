@@ -1,4 +1,5 @@
 import json
+from nltk.stem import WordNetLemmatizer
 
 
 class QuestionsData(object):
@@ -7,22 +8,25 @@ class QuestionsData(object):
 
     def read_questions_data(self):
         with open(self.__ques_path, 'r') as f:
-            jsonObj = json.load(f)
+            json_obj = json.load(f)
 
         questions_info, questions = {}, []
-        for question in jsonObj["questions"]:
+        for question in json_obj["questions"]:
             img_id = question["image_id"]
             ques_id = question["question_id"]
             questions_info[question["question"]] = (img_id, ques_id)
+            wordnetlemmtizer=WordNetLemmatizer()
+            question["question"]=wordnetlemmtizer.lemmatize(question["question"].lower(),pos='v')
             questions.append(question["question"])
+            print(WordNetLemmatizer.lemmatize(question["question"].lower(),pos='v'))
         return questions_info, questions
 
     def get_answers(self):
         with open(self.__ann_path, 'r') as f:
-            jsonObj = json.load(f)
+            json_obj = json.load(f)
 
         answers = {}
-        for ann in jsonObj["annotations"]:
+        for ann in json_obj["annotations"]:
             ques_id = ann["question_id"]
             list_of_answers = [item["answer"] for item in ann["answers"]]
             answers[ques_id] = list_of_answers

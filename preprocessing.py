@@ -4,12 +4,13 @@ import re
 from nltk.stem import PorterStemmer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import np_utils
+import csv
 
 
 Mytypes = ['1','2','3']
-Questions = open('train\questions.txt', encoding = 'utf-8', errors = 'ignore').read().split('\n')
-Answers = open('answers.txt').read().split('\n')
-Types = open('types.txt').read().split('\n')
+Questions = open('C:/Users/abdal_000/.spyder-py3/data/cocoqa/test/questions.txt', encoding = 'utf-8', errors = 'ignore').read().split('\n')
+Answers = open('C:/Users/abdal_000/.spyder-py3/data/cocoqa/test/answers.txt').read().split('\n')
+Types = open('C:/Users/abdal_000/.spyder-py3/data/cocoqa/test/types.txt').read().split('\n')
 
 def clean_text(text):
 	    text = text.lower()
@@ -81,8 +82,10 @@ for question in clean_questions:
            encode_question.append(ques_id['UNK'])
    encoding_questions.append(encode_question)
 
-encoding_questions = pad_sequences(encoding_questions, maxlen=25, padding='post')
-
+encoding_questions = pad_sequences(encoding_questions, maxlen=55, padding='post')
+with open("E:\GP Downloads\Q_test" + ".csv", "w") as f:
+    writer = csv.writer(f)
+    writer.writerows(encoding_questions)
 """ Generating Answers """
 
 encoding_answers = []
@@ -111,3 +114,6 @@ for i in range(0,len(Answers)):
          y_true.append(answers_id[Answers[i]])
          
 y_true = np_utils.to_categorical(y_true, 150)
+with open("E:\GP Downloads\y_true_test" + ".csv", "w") as f:
+    writer = csv.writer(f)
+    writer.writerows(y_true)

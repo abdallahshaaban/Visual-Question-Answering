@@ -10,6 +10,14 @@ import tensorflow as tf
 from keras import backend as K
 from keras.engine.topology import Layer
 from model import question_hierarchy,parallel_co_attention
+import pandas as pd
+
+def generate_batch(ques,y_true,image_feature,index):
+    minimum = min(len(ques),index+300)  
+    q=ques[index:minimum,:]
+    y=y_true[index:minimum , :]
+    v=image_feature[index:minimum,:]
+    return q,y,v,index+300
 
 
 vocab_size = 1000 
@@ -17,6 +25,14 @@ max_length = 15
 batchsize = 300
 Num_of_Classes = 150
 NUM_OF_EPOCHS = 1
+dataset=pd.read_csv('E:\GP Downloads\y_true_test.csv' , header=None)
+y_true_test = dataset.iloc[:, :].values
+dataset=pd.read_csv('E:\GP Downloads\y_true_train.csv' , header=None)
+y_true_train = dataset.iloc[:, :].values
+dataset=pd.read_csv('E:\GP Downloads\Q_test.csv' , header=None)
+Q_test = dataset.iloc[:, :].values
+dataset=pd.read_csv('E:\GP Downloads\Q_train.csv' , header=None)
+Q_train = dataset.iloc[:, :].values
 
 
 Ques = tf.placeholder(tf.float32, [None, 15])
@@ -50,7 +66,8 @@ hs =  tf.nn.dropout( K.dot(hs_,Ws) + bs ,  keep_prob = 0.5)
 Wh = tf.Variable(initializer([512,Num_of_Classes]))
 bh = tf.Variable(initializer([1,Num_of_Classes]))
 y_pred =  tf.nn.softmax(K.dot(hs,Wh) + bh)
-
+y_pred = tf.reshape( y_pred , [-1,Num_of_Classes ])
+print(y_pred.shape)
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_true,logits=y_pred))
 
 optimizer = tf.train.RMSPropOptimizer(learning_rate=0.0004, momentum=0.99 , decay=0.00000001)
@@ -66,9 +83,11 @@ with tf.Session() as sess:
     for i in range(NUM_OF_EPOCHS):
 
         #generate Batch 
-        print("Epoch ", i ," :  Acc = ")
-        
-        sess.run(train,feed_dict={Ques:Q_batch ,y_true:y_batch , V:V_batch})
+        index=0
+        while index<len(Q_train):
+            Q_batch,y_batch,V_batch,index=generate_batch(Q_train,y_true_train,index)
+            print("Epoch ", i ," :  Acc = ")
+            sess.run(train,feed_dict={Ques:Q_batch ,y_true:y_batch , V:V_batch})
         
         matches = tf.equal(tf.argmax(y_pred,1),tf.argmax(y_true,1))
         
