@@ -1,0 +1,14 @@
+
+Microsoft Asure
+---------------
+account: abdullah.mahmoud@cis.asu.edu.eg
+password:Asateer-VQA1
+
+VQA VM
+-------
+Name: VQA 
+OS: Windows
+User Name: AbdullahMahmoud
+password: Asateer-VQA1
+storage account name: ff7a1ea5f249dsvm
+
