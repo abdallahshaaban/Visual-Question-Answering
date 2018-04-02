@@ -93,7 +93,7 @@ with tf.Session() as sess:
         
         acc = tf.reduce_mean(tf.cast(matches,tf.float32))
         
-        print(sess.run(acc,feed_dict={Ques:Q_Val ,y_true:y_Val ,V:V_val,hold_prob = 1.0}))
+        print(sess.run(acc,feed_dict={Ques:Q_test ,y_true:y_true_test ,V:V_val,hold_prob = 1.0}))
 
 
 
