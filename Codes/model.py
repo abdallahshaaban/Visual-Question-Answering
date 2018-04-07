@@ -53,7 +53,7 @@ def parallel_co_attention ( Q , V ):
  print("C = " , C.shape)
  """Computing WvV """
  
- Wvt = tf.Variable(initializer([512,10]))
+ Wvt = tf.Variable(initializer([512,512]))
  Vt = tf.transpose(V, perm=[0, 2, 1])  # V transposed
  Vt_Wvt = K.dot( Vt , Wvt ) #shape 
  Wv_V = tf.transpose(Vt_Wvt, perm=[0, 2, 1]) 
@@ -62,7 +62,7 @@ def parallel_co_attention ( Q , V ):
 
  """WqQ_C """
 
- Wqt = tf.Variable(initializer([512,10]))
+ Wqt = tf.Variable(initializer([512,512]))
  Qt_Wvt = K.dot( Q , Wqt ) 
  Wq_Q = tf.transpose(Qt_Wvt , perm=[0, 2, 1])
  print("Wq_Q = ",Wq_Q.shape)
@@ -76,7 +76,7 @@ def parallel_co_attention ( Q , V ):
 
  """av """
 
- Whv = tf.Variable(initializer([10,1]))
+ Whv = tf.Variable(initializer([512,1]))
  Hvt = tf.transpose(Hv , perm=[0, 2, 1])
 
  av = tf.transpose(K.dot(Hvt , Whv), perm=[0, 2, 1])
@@ -97,7 +97,7 @@ def parallel_co_attention ( Q , V ):
 
  
  """computng aq """
- Whq = tf.Variable(initializer([10,1])) #shape(k,1)
+ Whq = tf.Variable(initializer([512,1])) #shape(k,1)
  Hqt = tf.transpose(Hq , perm=[0, 2, 1])
 
  aq = tf.transpose(K.dot(Hqt , Whq), perm=[0, 2, 1])

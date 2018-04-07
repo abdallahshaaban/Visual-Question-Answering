@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 
 import numpy as np
 from keras.models import Sequential
@@ -13,6 +14,8 @@ from keras.engine.topology import Layer
 from model import question_hierarchy,parallel_co_attention
 import pandas as pd
 from Reading_Images_Features  import fun
+fig = plt.figure()
+ax1 = fig.add_subplot(1,1,1)
 
 def generate_batch(ques,y_true,image_feature,index):
     minimum = min(len(ques),index+300)  
@@ -26,7 +29,7 @@ vocab_size = 1000
 max_length = 55
 batchsize = 300
 Num_of_Classes = 10
-NUM_OF_EPOCHS = 50
+NUM_OF_EPOCHS = 10
 #dataset=pd.read_csv('E:\GP Downloads\y_true_test.csv' , header=None)
 #y_true_test = dataset.iloc[:, :].values
 dataset=pd.read_csv('E:\\Prototype Dataset\\PreProcessed Text\\y_true_train.csv' , header=None)
@@ -72,12 +75,13 @@ y_pred = tf.reshape( y_pred , [-1,Num_of_Classes ])
 print(y_pred.shape)
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_true,logits=y_pred))
 
-optimizer = tf.train.AdamOptimizer(learning_rate=1)
+optimizer = tf.train.AdamOptimizer(learning_rate=0.05)
 
 train = optimizer.minimize(cross_entropy)
 
 init = tf.global_variables_initializer()
-
+ACC = []
+Epoch = []
 with tf.Session() as sess:
     
     sess.run(init)
@@ -93,7 +97,16 @@ with tf.Session() as sess:
         
         matches = tf.equal(tf.argmax(y_pred,1),tf.argmax(y_true,1))
         acc = tf.reduce_mean(tf.cast(matches,tf.float32))
-        print("Epoch : ",i,"  Acc = ",sess.run(acc,feed_dict={Ques:Q_train ,y_true:y_true_train ,V:V_train}))
+        Accuracy = sess.run(acc,feed_dict={Ques:Q_train ,y_true:y_true_train ,V:V_train})
+        print("Epoch : ",i,"  Acc = ",Accuracy)
+        ACC.append(Accuracy)
+        Epoch.append(i)
+    
+
+ax1.clear()        
+ax1.plot(Epoch,ACC)    
+plt.show()
+
 
 
 
