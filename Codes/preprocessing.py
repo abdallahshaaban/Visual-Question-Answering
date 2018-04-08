@@ -83,7 +83,7 @@ for question in clean_questions:
    encoding_questions.append(encode_question)
 
 encoding_questions = pad_sequences(encoding_questions, maxlen=55, padding='post')
-with open("E:\\Prototype Dataset\\PreProcessed Text\\Q_tran" + ".csv", "w") as f:
+with open("E:\\Prototype Dataset\\PreProcessed Text\\Q_train" + ".csv", "w") as f:
     writer = csv.writer(f)
     writer.writerows(encoding_questions)
 """ Generating Answers """

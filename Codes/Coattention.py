@@ -58,7 +58,7 @@ def Co_attention(x):
     
     h_level=x[0]
     V = x[1]
-    k_dim = 10
+    k_dim = 512
     
     C =  Lambda(Compute_c)([h_level,V])
     Vt = Lambda(Transpose)(V)

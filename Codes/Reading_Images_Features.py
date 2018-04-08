@@ -8,8 +8,8 @@ import pandas as pd
 import numpy as np
 
 # Import The Dataset
-def fun():
-    with open('E:\\Prototype Dataset\\Training\\img_ids.txt') as f:
+def LoadFeatures(FilePath,FeaturesPath):
+    with open(FilePath) as f:
         l = f.readlines()
     l = [x.strip() for x in l] 
     
@@ -29,8 +29,6 @@ def fun():
            ]
     DataSet_Features = np.full((len(l),512,49),0.0)
     for j in range(len(l)):
-        dataset = pd.read_csv('E:\\Prototype Dataset\\Images Features\\COCO_train2014_' + tmp[len(str(l[j]))] + str(l[j]) + '.csv' , header = None)
-        x = dataset.iloc[:, 0:3].values
-        for i in range(len(x[:,0])):
-            DataSet_Features[j,np.int32(x[i,1]),np.int32(x[i,2])] = x[i,0]
+        dataset = pd.read_csv(FeaturesPath + tmp[len(str(l[j]))] + str(l[j]) + '.csv' , header = None)
+        DataSet_Features[j,:,:] = dataset.iloc[:,:].values
     return DataSet_Features
