@@ -8,6 +8,7 @@ from keras.layers import Concatenate,Reshape , Input ,LSTM, Dense, Dropout ,conc
 from keras.layers.convolutional import Conv2D, MaxPooling2D , Conv1D
 from keras.layers.embeddings import Embedding
 from keras.layers.core import Activation,Lambda
+from keras.models import model_from_json
 import tensorflow as tf
 from keras import backend as K
 from keras.engine.topology import Layer
@@ -68,4 +69,23 @@ Rms = keras.optimizers.RMSprop(lr=0.0004, rho=0.9, epsilon=None, decay=0.0000000
 model = Model(inputs=[Q,V], outputs=p)
 model.compile(optimizer=Rms, loss='categorical_crossentropy',metrics=['accuracy'])
 model.fit([Q_train,V_train], [y_true_train],epochs=256, batch_size=300,validation_data = ([Q_test,V_test],y_true_test ))
+
+# save model as json file
+saved_model = model.to_json()
+with open("model.json", "w") as file:
+    file.write(saved_model)
+
+# save weights as hdf5
+model.save_weights("model.h5")
+print("Model saved successfully to disk")
+
+# Loading model
+file = open("model.json", "r")
+loaded_model_json = file.read()
+file.close()
+loaded_model = model_from_json(loaded_model_json)
+
+# Loading weights
+loaded_model.load_weights("model.h5")
+print("Loaded model successfully from disk")
 
