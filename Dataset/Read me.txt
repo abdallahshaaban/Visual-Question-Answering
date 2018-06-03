@@ -1,4 +1,0 @@
-Data types : 1,2,3 (Numbers,Colors,Locations)
-Questions: 23744
-Images: 18858
-Classes: 150 (Type1:10,Type2:10,Type3:130)
