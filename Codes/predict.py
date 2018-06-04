@@ -22,18 +22,18 @@ from tkinter import messagebox
 
 
 """train"""
-dataset=pd.read_csv('E:\\PreProcessed Text\\y_true_train.csv' , header=None)
+dataset=pd.read_csv('y_true_train.csv' , header=None)
 y_true_train = dataset.iloc[:, :].values
-dataset=pd.read_csv('E:\\PreProcessed Text\\Q_train.csv' , header=None)
+dataset=pd.read_csv('Q_train.csv' , header=None)
 Q_train = dataset.iloc[:, :].values
-V_train=LoadFeatures("E:\\COCO-QA Dataset\\train\\img_ids.txt","E:\\COCO-QA Dataset\\Training Images Features\\CO_train2014_")
+V_train=LoadFeatures("C:\\Users\\abdullahfcis\\Desktop\\VQA Dataset\\train\\img_ids.txt","C:\\Users\\abdullahfcis\\Desktop\\VQA Dataset\\train\\Images Features\\COCO_train2014_")
 
 """test"""
-dataset=pd.read_csv('E:\\PreProcessed Text\\y_true_test.csv' , header=None)
+dataset=pd.read_csv('y_true_test.csv' , header=None)
 y_true_test = dataset.iloc[:, :].values
-dataset=pd.read_csv('E:\\PreProcessed Text\\Q_test.csv' , header=None)
+dataset=pd.read_csv('Q_test.csv' , header=None)
 Q_test = dataset.iloc[:, :].values
-V_test=LoadFeatures("E:\\COCO-QA Dataset\\test\\img_ids.txt","E:\\COCO-QA Dataset\\Testing Images Features\\CO_val2014_") 
+V_test=LoadFeatures("C:\\Users\\abdullahfcis\\Desktop\\VQA Dataset\\test\\img_ids.txt","C:\\Users\\abdullahfcis\\Desktop\\VQA Dataset\\test\\Images Features\\COCO_val2014_") 
 
 
 Q = Input(shape=(55,))
@@ -76,8 +76,11 @@ with open("model.json", "w") as file:
     file.write(saved_model)
 
 # save weights as hdf5
-model.save_weights("model.h5")
+model.save_weights("Weights.h5")
 print("Model saved successfully to disk")
+
+#save model structure with weights
+model.save("Model_Weights.h5")
 
 # Loading model
 file = open("model.json", "r")
@@ -86,6 +89,6 @@ file.close()
 loaded_model = model_from_json(loaded_model_json)
 
 # Loading weights
-loaded_model.load_weights("model.h5")
+loaded_model.load_weights("Weights.h5")
 print("Loaded model successfully from disk")
 

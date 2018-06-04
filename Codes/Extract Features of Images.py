@@ -9,7 +9,7 @@ model = Model(inputs=base_model.input, outputs=base_model.get_layer('block5_pool
 
 from PIL import Image
 import glob
-for filename in glob.glob('E:\\COCO-QA Dataset\\Testing Images/*.jpg'): 
+for filename in glob.glob('C:\\Users\\abdullahfcis\\Desktop\\VQA Dataset\\test\\Images/*.jpg'): 
     img_path = filename
     img = image.load_img(img_path, target_size=(224, 224))
     x = image.img_to_array(img)
@@ -25,7 +25,7 @@ for filename in glob.glob('E:\\COCO-QA Dataset\\Testing Images/*.jpg'):
             V[:,c] = block4_pool_features[0,i,j,:]
             c = c + 1
     import csv
-    with open("E:\\COCO-QA Dataset\\Testing Images Features\\" + filename[36:-4] + ".csv", "w") as f:
+    with open("C:\\Users\\abdullahfcis\\Desktop\\VQA Dataset\\test\\Images Features\\" + filename[54:-4] + ".csv", "w") as f:
         writer = csv.writer(f)
         writer.writerows(V)
 
