@@ -25,7 +25,7 @@ def upload_img():
         #####
 
         # return your result
-        Ans=ans
+        Ans=ans + " with confidence " + str(round(pred[0,pred.argmax(axis=1)[0]],3)) + "%"
         return Ans
 
 
@@ -33,4 +33,4 @@ def upload_img():
         return "Y U NO USE POST?"
 
 if __name__ == "__main__":
-    app.run(host='192.168.43.36')
+    app.run(host='192.168.1.6')
