@@ -30,20 +30,14 @@ def clean_text(text):
 
 def encoding_question(text):
     text = clean_text(text)
-
     ques_id = np.load('ques_id.npy').item()
+    encoded_ques = []
 
-    encoded_ques = np.full((1, 55), 0)
-    idx = 0
-    for word in text.split():
-        if (word in ques_id):
-            encoded_ques[0, idx] = ques_id[word]
-        else:
-            encoded_ques[0, idx] = ques_id['UNK']
-        idx = idx + 1
+    encoded_ques = [one_hot(text, 1000)]
+    encoded_ques = pad_sequences(encoded_ques, maxlen=55, padding='post')
 
-    for idx in range(55):
-        encoded_ques[0, idx] = 0
+    encoded_ques = np.array(encoded_ques)
+    encoded_ques = np.reshape(encoded_ques, [1, 55])
 
     return encoded_ques
 
