@@ -1,10 +1,11 @@
 import os
+import numpy as np
 from flask import Flask, render_template, request, send_from_directory
 from keras.models import load_model
 from src.predict import model
 from src.get_image_features import extract_features
 from src.predict_utils import encoding_answer, encoding_question
-from src.load import model, vgg_model, graph
+from src.load import init
 from keras.applications.vgg19 import VGG19
 from keras.models import Model
 from PIL import Image
@@ -16,7 +17,8 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 
-# load the keras model
+# load the models
+model, vgg_model, graph = init(os.path.join(APP_ROOT, 'model\model_weights.h5'))
 # model = load_model(os.path.join(APP_ROOT, 'model/my_model.h5'))
 # model.load_weights(os.path.join(APP_ROOT, 'model/model_weights.h5'))
 # print(model)
@@ -49,9 +51,13 @@ def upload():
         # VQA System
         question = request.form['question']
         pred = model.predict([encoding_question(question), extract_features(destination, vgg_model)], batch_size=1)
-        ans = encoding_answer(pred.argmax(axis=1))
-        print(question)
-        print(ans)
+
+        ##
+
+        ##
+
+        #ans = encoding_answer(pred.argmax(axis=1))
+        ans = encoding_answer(question, pred)
 
         #return send_from_directory("images", filename, as_attachment=True)
         return render_template("complete.html", image_name = filename, question = question, answer = ans)
