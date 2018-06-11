@@ -29,52 +29,6 @@ def clean_text(text):
     return text
 
 
-# def encoding_question(text):
-#     print(text)
-#     text = clean_text(text)
-#     print(text)
-#     ques_id = np.load('ques_id.npy').item()
-#     print(ques_id)
-#
-#     encoded_ques = np.full((1, 55), 0)
-#     idx = 0
-#     for word in text.split():
-#         if (word in ques_id):
-#             encoded_ques[0, idx] = ques_id[word]
-#         else:
-#             encoded_ques[0, idx] = ques_id['UNK']
-#         idx = idx + 1
-#
-#     for idx in range(55):
-#         encoded_ques[0, idx] = 0
-#     print(encoded_ques)
-#     print(encoded_ques.shape)
-#     return encoded_ques
-
-# def encoding_question(text):
-#     text = clean_text(text)
-#
-#     ques_id = np.load('ques_id.npy').item()
-#     print(ques_id)
-#     encoded_ques = []
-#
-#     for word in text.split():
-#         if word in ques_id:
-#             encoded_ques.append(ques_id[word])
-#         else:
-#             encoded_ques.append(ques_id['UNK'])
-#
-#     Rem = 55 - len(encoded_ques)
-#
-#     for i in range(0, Rem):
-#         encoded_ques.append(0)
-#     encoded_ques = np.array(encoded_ques)
-#
-#     encoded_ques = np.reshape(encoded_ques, [1, 55])
-#     print(encoded_ques.shape)
-#     print(encoded_ques)
-#
-#     return encoded_ques
 
 def encoding_question(text):
     text = clean_text(text)
@@ -84,20 +38,11 @@ def encoding_question(text):
     encoded_ques = [one_hot(text, 1000)]
     encoded_ques = pad_sequences(encoded_ques, maxlen=55, padding='post')
 
-    # print(encoded_ques)
-    # print(encoded_ques.shape)
-
     encoded_ques = np.array(encoded_ques)
     encoded_ques = np.reshape(encoded_ques, [1, 55])
-    # print(encoded_ques)
-    # print(encoded_ques.shape)
 
     return encoded_ques
 
-
-# def encoding_answer(id):
-#     id_answers = np.load('id_answers.npy').item()
-#     return id_answers[id[0]]
 
 def encoding_answer(question, pred):
 
