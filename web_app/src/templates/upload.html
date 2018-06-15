@@ -3,14 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <title>Visual Question Answering</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script type=text/javascript>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
 </head>
 <body>
-<h1>Visual Question Answering</h1>
-<form id="upload-form" action="{{url_for('upload')}}" method = "POST" enctype="multipart/form-data">
-    <label>Question</label>
-    <input type="text" name="question" maxlength="100">
-    <input type="file" name="file" accept="image/*" multiple>
-    <input type="submit" value="Upload">
+<h1 id="title" class="text-center">Visual Question Answering</h1>
+
+<div = id="main-box">
+<form id="form-container" action="{{url_for('upload')}}" method = "POST" enctype="multipart/form-data">
+    <!-- <label id="ques-label" for="question-box">Question</label> -->
+    <input id="question-box" type="text" placeholder="Enter the question" name="question" maxlength="100" required>
+    <!-- <label>Input image</label> -->
+    <br><br>
+    <input id="image-input" type="file" name="file" accept="image/*" multiple required>
+    
+    <button id="submit-button" type="submit" class="btn btn-block btn-primary"><i class="fa"></i>Ask</button>
 </form>
+</div> 
+
+<div id="answer-box" style="display:none;">
+    <figure >
+    			<br><br>
+				<img id="image" src="" class = "center img-responsive">
+				<br><br>
+				<figcaption id = "answer" class="text-center">Mandela</figcaption>
+				<br><br>
+				
+			</figure>
+ </div> 
+
+ <!--<div class="alert answer-box" role="alert" >
+ 	<figure class="center">
+
+				<img src="http://cdn.history.com/sites/2/2013/12/Nelson_Mandela_Hero-E.jpeg" >
+				<figcaption>Mandela</figcaption>
+				
+			</figure>
+ </div> -->
+
 </body>
 </html>
