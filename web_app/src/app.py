@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from flask import Flask, render_template, request, send_from_directory, jsonify, flash
+from flask import Flask, render_template, request, send_from_directory
 from keras.models import load_model
 from src.predict import model
 from src.get_image_features import extract_features
@@ -11,9 +11,7 @@ from keras.models import Model
 from PIL import Image
 import tensorflow as tf
 
-#app = Flask(__name__, static_url_path="/static", static_folder="static")
 app = Flask(__name__)
-#app.config["UPLOAD_FOLDER"] = "static/images/"
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -37,7 +35,6 @@ def index():
 def upload():
     with graph.as_default():
         target = os.path.join(APP_ROOT, 'images/')
-        #target = app.config["UPLOAD_FOLDER"]
         #print(target)
 
         if not os.path.isdir(target):
@@ -62,10 +59,8 @@ def upload():
         #ans = encoding_answer(pred.argmax(axis=1))
         ans = encoding_answer(question, pred)
 
-        #return send_from_directory("images", filename)
+        #return send_from_directory("images", filename, as_attachment=True)
         return render_template("complete.html", image_name = filename, question = question, answer = ans)
-        #print(jsonify({'answer': ans, 'image_name': filename}))
-        #return jsonify({'answer': ans, 'image_name': filename})
 
 
 @app.route('/upload/<filename>')
@@ -75,6 +70,5 @@ def send_image(filename):
 
 
 if __name__ == "__main__":
-    app.secret_key = 'super_secret_key'
     app.run(port=4555, debug=True)
 
