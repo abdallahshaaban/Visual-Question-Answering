@@ -2,16 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Visual Question Answering</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    
 </head>
 <body>
 
 <!--<img src="{{url_for('send_image', filename=image_name)}}">-->
-<figure>
+<!--<figure>
 
 				<img src="{{url_for('send_image', filename=image_name)}}">
 				<figcaption>{{question}}</figcaption>
 				<figcaption>{{answer}}</figcaption>
-			</figure>
+			</figure>-->
+<div id="answer-box">
+	<figure >
+			<br><br>
+			<img class="center" id="image" src="{{url_for('send_image', filename=image_name)}}">
+			<br><br>
+			<figcaption id="answer" class="text-center">Question: {{question}}</figcaption>
+			<br>
+			<figcaption id="answer" class="text-center">Answer: {{answer}}</figcaption>
+			<br><br>
+			
+	</figure>
+ </div> 
 </body>
 </html>
