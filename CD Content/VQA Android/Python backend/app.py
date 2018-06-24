@@ -33,4 +33,4 @@ def upload_img():
         return "Y U NO USE POST?"
 
 if __name__ == "__main__":
-    app.run(host='192.168.1.10')
+    app.run(host='10.0.0.56')
